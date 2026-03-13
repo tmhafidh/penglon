@@ -2013,6 +2013,20 @@ body.light-mode ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15)}
               🗑️ Reset Semua Data
             </button>
           </div>
+
+          <!-- Load Dummy Data -->
+          <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem">
+              <div style="font-size:.78rem;font-weight:600;color:var(--text)">🧪 Testing</div>
+              <span style="font-size:.58rem;font-weight:600;letter-spacing:.8px;text-transform:uppercase;background:rgba(201,168,76,.12);border:1px solid var(--gold-border);color:var(--gold);padding:.1rem .45rem;border-radius:999px">DEV ONLY</span>
+            </div>
+            <div style="font-size:.72rem;color:var(--muted);margin-bottom:.65rem;line-height:1.5">
+              Isi aplikasi dengan <b>data contoh</b> (wallets, transaksi, goals, hutang, dll) untuk keperluan testing. Data yang ada saat ini akan <b>ditimpa</b>.
+            </div>
+            <button onclick="loadDummyData()" style="width:100%;padding:.6rem;border-radius:var(--radius-xs);background:rgba(201,168,76,.07);border:1.5px solid var(--gold-border);color:var(--gold);font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;transition:all .2s" onmouseover="this.style.background='rgba(201,168,76,.14)'" onmouseout="this.style.background='rgba(201,168,76,.07)'">
+              🧪 Load Dummy Data
+            </button>
+          </div>
         </div>
       </div>
     </div><!-- /report -->
@@ -5390,6 +5404,112 @@ function confirmResetData(){
       );
     },
     {title:'Reset Semua Data',ico:'🗑️',btnLabel:'Lanjutkan Reset',danger:true}
+  );
+}
+
+/* ── LOAD DUMMY DATA (testing only) ─────────────────────── */
+function loadDummyData(){
+  askConfirm(
+    'Data yang ada saat ini akan ditimpa dengan data contoh.\n\nLanjutkan?',
+    function(){
+      var dummy = {
+        wallets:[
+          {id:"w_001",name:"BCA Utama",emoji:"🏦",type:"bank",initialBalance:5000000,note:"Rekening utama gaji",color:"#5C9BE0",createdAt:"2025-01-01T00:00:00.000Z"},
+          {id:"w_002",name:"GoPay",emoji:"📱",type:"ewallet",initialBalance:350000,note:"Untuk belanja online & transportasi",color:"#4CAF82",createdAt:"2025-01-01T00:00:00.000Z"},
+          {id:"w_003",name:"Dompet Tunai",emoji:"👛",type:"cash",initialBalance:500000,note:"Uang tunai harian",color:"#C9A84C",createdAt:"2025-01-01T00:00:00.000Z"},
+          {id:"w_004",name:"Mandiri Tabungan",emoji:"💰",type:"bank",initialBalance:12000000,note:"Dana darurat",color:"#9B6EE0",createdAt:"2025-01-01T00:00:00.000Z"}
+        ],
+        transactions:[
+          {id:"tx_001",month:"2026-03",type:"income",name:"Gaji Maret",amount:8500000,catId:"gaji",catLabel:"Gaji",catEmoji:"💼",expType:null,walletId:"w_001",note:"Transfer dari kantor",date:"2026-03-01T08:00:00.000Z",recurring:"monthly"},
+          {id:"tx_002",month:"2026-03",type:"expense",name:"Bayar Kos",amount:1500000,catId:"sewa",catLabel:"Sewa / KPR",catEmoji:"🏠",expType:"needs",walletId:"w_001",note:"Kos bulan Maret",date:"2026-03-01T09:00:00.000Z",recurring:"monthly"},
+          {id:"tx_003",month:"2026-03",type:"expense",name:"Belanja Bulanan Indomaret",amount:320000,catId:"makan",catLabel:"Makan & Minum",catEmoji:"🍽️",expType:"needs",walletId:"w_002",note:"Stok sembako + minuman",date:"2026-03-02T11:30:00.000Z",recurring:"none"},
+          {id:"tx_004",month:"2026-03",type:"expense",name:"Grab ke Kantor",amount:35000,catId:"transport",catLabel:"Transportasi",catEmoji:"🚗",expType:"needs",walletId:"w_002",note:"",date:"2026-03-03T07:15:00.000Z",recurring:"none"},
+          {id:"tx_005",month:"2026-03",type:"expense",name:"Netflix",amount:54000,catId:"langganan",catLabel:"Streaming",catEmoji:"📺",expType:"wants",walletId:"w_001",note:"Langganan bulanan",date:"2026-03-03T10:00:00.000Z",recurring:"monthly"},
+          {id:"tx_006",month:"2026-03",type:"expense",name:"Makan Siang Warteg",amount:18000,catId:"makan",catLabel:"Makan & Minum",catEmoji:"🍽️",expType:"needs",walletId:"w_003",note:"",date:"2026-03-03T12:30:00.000Z",recurring:"none"},
+          {id:"tx_007",month:"2026-03",type:"expense",name:"Listrik PLN",amount:245000,catId:"listrik",catLabel:"Listrik & Air",catEmoji:"💡",expType:"needs",walletId:"w_001",note:"Tagihan Februari",date:"2026-03-04T09:00:00.000Z",recurring:"monthly"},
+          {id:"tx_008",month:"2026-03",type:"expense",name:"Pulsa Telkomsel",amount:100000,catId:"pulsa",catLabel:"Pulsa / Internet",catEmoji:"📱",expType:"needs",walletId:"w_002",note:"Paket 30 hari",date:"2026-03-05T08:00:00.000Z",recurring:"monthly"},
+          {id:"tx_009",month:"2026-03",type:"expense",name:"Nonton Bioskop",amount:85000,catId:"hiburan",catLabel:"Hiburan",catEmoji:"🎮",expType:"wants",walletId:"w_002",note:"CGV bersama teman",date:"2026-03-06T19:00:00.000Z",recurring:"none"},
+          {id:"tx_010",month:"2026-03",type:"expense",name:"Shopee — Baju Kerja",amount:175000,catId:"belanja",catLabel:"Belanja",catEmoji:"🛍️",expType:"wants",walletId:"w_002",note:"2 kemeja formal",date:"2026-03-07T14:00:00.000Z",recurring:"none"},
+          {id:"tx_011",month:"2026-03",type:"income",name:"Freelance Logo Design",amount:1200000,catId:"freelance",catLabel:"Freelance",catEmoji:"💻",expType:null,walletId:"w_001",note:"Klien PT Maju Jaya",date:"2026-03-08T16:00:00.000Z",recurring:"none"},
+          {id:"tx_012",month:"2026-03",type:"expense",name:"Makan Malam Pizza Hut",amount:145000,catId:"makan_luar",catLabel:"Makan di Luar",catEmoji:"🍕",expType:"wants",walletId:"w_002",note:"Makan bareng pacar",date:"2026-03-08T19:30:00.000Z",recurring:"none"},
+          {id:"tx_013",month:"2026-03",type:"expense",name:"Spotify Premium",amount:54990,catId:"langganan",catLabel:"Streaming",catEmoji:"📺",expType:"wants",walletId:"w_001",note:"",date:"2026-03-09T10:00:00.000Z",recurring:"monthly"},
+          {id:"tx_014",month:"2026-03",type:"expense",name:"Investasi Reksa Dana",amount:500000,catId:"saham",catLabel:"Saham/Reksa Dana",catEmoji:"📊",expType:"invest",walletId:"w_001",note:"Bibit — RDPU",date:"2026-03-10T08:00:00.000Z",recurring:"monthly"},
+          {id:"tx_015",month:"2026-03",type:"expense",name:"Obat di Apotek",amount:67000,catId:"kesehatan",catLabel:"Kesehatan",catEmoji:"🏥",expType:"needs",walletId:"w_003",note:"Paracetamol + vitamin C",date:"2026-03-11T15:00:00.000Z",recurring:"none"},
+          {id:"tx_016",month:"2026-03",type:"expense",name:"Top Up Dana Darurat",amount:300000,catId:"tabungan",catLabel:"Tabungan",catEmoji:"🏦",expType:"invest",walletId:"w_001",note:"Transfer ke Mandiri",date:"2026-03-12T09:00:00.000Z",recurring:"monthly"},
+          {id:"tx_017",month:"2026-03",type:"expense",name:"Kopi Kenangan",amount:29000,catId:"makan",catLabel:"Makan & Minum",catEmoji:"🍽️",expType:"needs",walletId:"w_002",note:"",date:"2026-03-13T08:30:00.000Z",recurring:"none"},
+          {id:"tx_018",month:"2026-02",type:"income",name:"Gaji Februari",amount:8500000,catId:"gaji",catLabel:"Gaji",catEmoji:"💼",expType:null,walletId:"w_001",note:"",date:"2026-02-01T08:00:00.000Z",recurring:"monthly"},
+          {id:"tx_019",month:"2026-02",type:"expense",name:"Bayar Kos",amount:1500000,catId:"sewa",catLabel:"Sewa / KPR",catEmoji:"🏠",expType:"needs",walletId:"w_001",note:"",date:"2026-02-01T09:00:00.000Z",recurring:"monthly"},
+          {id:"tx_020",month:"2026-02",type:"expense",name:"Makan & Belanja Minggu 1",amount:450000,catId:"makan",catLabel:"Makan & Minum",catEmoji:"🍽️",expType:"needs",walletId:"w_003",note:"",date:"2026-02-07T12:00:00.000Z",recurring:"none"},
+          {id:"tx_021",month:"2026-02",type:"expense",name:"Transportasi Februari",amount:280000,catId:"transport",catLabel:"Transportasi",catEmoji:"🚗",expType:"needs",walletId:"w_002",note:"Grab + Commuter Line",date:"2026-02-14T07:00:00.000Z",recurring:"none"},
+          {id:"tx_022",month:"2026-02",type:"income",name:"Bonus Proyek Q4",amount:2000000,catId:"bonus",catLabel:"Bonus",catEmoji:"🎁",expType:null,walletId:"w_001",note:"Bonus akhir tahun dari kantor",date:"2026-02-15T10:00:00.000Z",recurring:"none"},
+          {id:"tx_023",month:"2026-01",type:"income",name:"Gaji Januari",amount:8500000,catId:"gaji",catLabel:"Gaji",catEmoji:"💼",expType:null,walletId:"w_001",note:"",date:"2026-01-01T08:00:00.000Z",recurring:"monthly"},
+          {id:"tx_024",month:"2026-01",type:"expense",name:"Liburan Tahun Baru Bandung",amount:950000,catId:"liburan",catLabel:"Liburan",catEmoji:"✈️",expType:"wants",walletId:"w_001",note:"Hotel + makan + tiket kereta",date:"2026-01-03T06:00:00.000Z",recurring:"none"},
+          {id:"tx_025",month:"2026-01",type:"expense",name:"Bayar Kos",amount:1500000,catId:"sewa",catLabel:"Sewa / KPR",catEmoji:"🏠",expType:"needs",walletId:"w_001",note:"",date:"2026-01-02T09:00:00.000Z",recurring:"monthly"}
+        ],
+        goals:[
+          {id:"goal_001",name:"Beli Laptop Baru",emoji:"💻",target:15000000,current:4500000,deadline:"2026-09-01",history:[
+            {amt:1500000,note:"Top up pertama",date:"2026-01-15T10:00:00.000Z",walletId:"w_001"},
+            {amt:1500000,note:"Top up Februari",date:"2026-02-15T10:00:00.000Z",walletId:"w_001"},
+            {amt:1500000,note:"Top up Maret",date:"2026-03-10T10:00:00.000Z",walletId:"w_001"}
+          ]},
+          {id:"goal_002",name:"Dana Liburan Bali",emoji:"🏖️",target:8000000,current:2000000,deadline:"2026-12-01",history:[
+            {amt:1000000,note:"Mulai nabung",date:"2026-02-01T10:00:00.000Z",walletId:"w_004"},
+            {amt:1000000,note:"Top up bulan ini",date:"2026-03-05T10:00:00.000Z",walletId:"w_004"}
+          ]},
+          {id:"goal_003",name:"Motor Honda PCX",emoji:"🏍️",target:30000000,current:8000000,deadline:"2027-06-01",history:[
+            {amt:2000000,note:"DP awal",date:"2025-10-01T10:00:00.000Z",walletId:"w_004"},
+            {amt:2000000,note:"November",date:"2025-11-01T10:00:00.000Z",walletId:"w_004"},
+            {amt:2000000,note:"Desember",date:"2025-12-01T10:00:00.000Z",walletId:"w_004"},
+            {amt:2000000,note:"Januari",date:"2026-01-01T10:00:00.000Z",walletId:"w_004"}
+          ]}
+        ],
+        debts:[
+          {id:"dbt_001",type:"owe",person:"Budi Santoso",amount:500000,paid:200000,due:"2026-04-01",note:"Pinjam buat bayar makan bareng",walletId:"w_001",createdAt:"2026-02-20T10:00:00.000Z",payments:[
+            {amt:200000,note:"Bayar sebagian",date:"2026-03-05T10:00:00.000Z",walletId:"w_001"}
+          ]},
+          {id:"dbt_002",type:"lend",person:"Rina Dewi",amount:300000,paid:0,due:"2026-03-20",note:"Piutang untuk transportasi kantor",walletId:"w_003",createdAt:"2026-03-01T10:00:00.000Z",payments:[]},
+          {id:"dbt_003",type:"owe",person:"Ibu (Pinjam darurat)",amount:2000000,paid:2000000,due:"2026-02-28",note:"Sudah lunas",walletId:"w_001",createdAt:"2026-01-10T10:00:00.000Z",payments:[
+            {amt:2000000,note:"Lunas",date:"2026-02-25T10:00:00.000Z",walletId:"w_001"}
+          ]}
+        ],
+        recurs:[
+          {id:"rec_001",name:"Netflix",amount:54000,day:3,note:"Langganan streaming",walletId:"w_001",txType:"expense",freq:"monthly",catId:"langganan",active:true,createdAt:"2026-01-01T00:00:00.000Z"},
+          {id:"rec_002",name:"Spotify Premium",amount:54990,day:9,note:"",walletId:"w_001",txType:"expense",freq:"monthly",catId:"langganan",active:true,createdAt:"2026-01-01T00:00:00.000Z"},
+          {id:"rec_003",name:"Bayar Kos",amount:1500000,day:1,note:"Jatuh tempo tiap tanggal 1",walletId:"w_001",txType:"expense",freq:"monthly",catId:"sewa",active:true,createdAt:"2026-01-01T00:00:00.000Z"},
+          {id:"rec_004",name:"Listrik PLN",amount:245000,day:4,note:"Dibayar tiap awal bulan",walletId:"w_001",txType:"expense",freq:"monthly",catId:"listrik",active:true,createdAt:"2026-01-01T00:00:00.000Z"},
+          {id:"rec_005",name:"Pulsa Telkomsel",amount:100000,day:5,note:"Paket data 30GB",walletId:"w_002",txType:"expense",freq:"monthly",catId:"pulsa",active:true,createdAt:"2026-01-01T00:00:00.000Z"},
+          {id:"rec_006",name:"Investasi Reksa Dana",amount:500000,day:10,note:"Bibit autoinvest RDPU",walletId:"w_001",txType:"expense",freq:"monthly",catId:"saham",active:true,createdAt:"2026-01-01T00:00:00.000Z"},
+          {id:"rec_007",name:"Gaji Bulanan",amount:8500000,day:1,note:"Transfer dari kantor",walletId:"w_001",txType:"income",freq:"monthly",catId:"gaji",active:true,createdAt:"2026-01-01T00:00:00.000Z"}
+        ],
+        wishlist:[
+          {id:"wish_001",name:"iPhone 16 Pro",emoji:"📱",price:18999000,fund:3000000,cat:"gadget",priority:"high",link:"https://apple.com",note:"Ganti iPhone lama yang sudah lemot",bought:false,createdAt:"2026-02-01T00:00:00.000Z",fundHistory:[
+            {amt:1500000,note:"Dana awal",date:"2026-02-01T00:00:00.000Z",walletId:"w_004"},
+            {amt:1500000,note:"Nabung lagi",date:"2026-03-01T00:00:00.000Z",walletId:"w_004"}
+          ]},
+          {id:"wish_002",name:"Sepatu Nike Air Max",emoji:"👟",price:1800000,fund:500000,cat:"fashion",priority:"med",link:"",note:"Buat olahraga & casual",bought:false,createdAt:"2026-03-01T00:00:00.000Z",fundHistory:[
+            {amt:500000,note:"Dana awal",date:"2026-03-01T00:00:00.000Z",walletId:"w_001"}
+          ]},
+          {id:"wish_003",name:"Standing Desk",emoji:"🖥️",price:3500000,fund:0,cat:"home",priority:"low",link:"",note:"Buat WFH lebih nyaman",bought:false,createdAt:"2026-03-10T00:00:00.000Z",fundHistory:[]}
+        ],
+        transfers:[]
+      };
+
+      try{
+        localStorage.setItem('ft_wallets',   JSON.stringify(dummy.wallets));
+        localStorage.setItem('ft_txs',       JSON.stringify(dummy.transactions));
+        localStorage.setItem('ft_goals',     JSON.stringify(dummy.goals));
+        localStorage.setItem('ft_debts',     JSON.stringify(dummy.debts));
+        localStorage.setItem('ft_recurs',    JSON.stringify(dummy.recurs));
+        localStorage.setItem('ft_wishlist',  JSON.stringify(dummy.wishlist));
+        localStorage.setItem('ft_transfers', JSON.stringify(dummy.transfers));
+        showToast('🧪 Dummy data berhasil dimuat!');
+        setTimeout(function(){location.reload();},800);
+      }catch(e){
+        showToast('⚠️ Gagal load dummy data');
+        console.warn(e);
+      }
+    },
+    {title:'Load Dummy Data',ico:'🧪',btnLabel:'Ya, Timpa & Load',danger:false}
   );
 }
 
