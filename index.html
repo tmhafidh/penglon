@@ -2006,6 +2006,9 @@ body.light-mode ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15)}
           <div style="display:flex;gap:.5rem;flex-wrap:wrap">
             <button class="btn-secondary" onclick="exportCSV()">📄 CSV Periode Ini</button>
             <button class="btn-secondary" onclick="exportAllCSV()">📄 Semua Data (CSV)</button>
+            <button class="btn-secondary" onclick="exportPDF()" style="display:flex;align-items:center;gap:.35rem">
+              🗂️ Laporan PDF
+            </button>
           </div>
         </div>
 
@@ -4051,8 +4054,8 @@ function renderNetWorthBars(){
 
 
 /* ── EXPORT CSV ───────────────────────────────────────── */
-function exportCSV(){doExportCSV(getPeriodTx(),'fintrack-'+period.label.replace(/[^a-zA-Z0-9]/g,'-')+'.csv')}
-function exportAllCSV(){doExportCSV(getTx(),'fintrack-semua.csv')}
+function exportCSV(){doExportCSV(getPeriodTx(),'PengLon-'+period.label.replace(/[^a-zA-Z0-9]/g,'-')+'.csv')}
+function exportAllCSV(){doExportCSV(getTx(),'PengLon-semua.csv')}
 function doExportCSV(txs,filename){
   if(!txs.length){showToast('⚠️ Tidak ada data untuk diexport');return}
   var rows=[['Tanggal','Nama','Tipe','Kategori','Jenis Pengeluaran','Nominal','Catatan','Berulang']];
@@ -4071,6 +4074,154 @@ function doExportCSV(txs,filename){
   var a=document.createElement('a'); a.href=url; a.download=filename; a.click();
   URL.revokeObjectURL(url);
   showToast('⬇ CSV berhasil diexport');
+}
+
+/* ── EXPORT PDF ───────────────────────────────────────── */
+function exportPDF(){
+  var txs = getPeriodTx();
+  var wallets = getWallets();
+  var goals = getGoals();
+  var debts = getDebts();
+
+  // compute summary
+  var totalIn = txs.filter(function(t){return t.type==='income'}).reduce(function(s,t){return s+t.amount},0);
+  var totalOut = txs.filter(function(t){return t.type==='expense'}).reduce(function(s,t){return s+t.amount},0);
+  var balance = totalIn - totalOut;
+  var now = new Date();
+  var periodeLabel = document.getElementById('periodLabel').textContent || 'Periode Ini';
+  var tanggalCetak = now.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+
+  // wallet balances
+  var walletRows = wallets.map(function(w){
+    var bal = computeWalletBalance(w);
+    return '<tr><td>'+(w.emoji||'💼')+' '+escH(w.name)+'</td><td>'+escH(WALLET_TYPE_NAMES[w.type]||w.type)+'</td><td style="text-align:right;font-weight:600;color:'+(bal>=0?'#1a8a52':'#c0392b')+'">'+fmt(bal)+'</td></tr>';
+  }).join('');
+
+  // top categories
+  var catMap = {};
+  txs.filter(function(t){return t.type==='expense'}).forEach(function(t){
+    catMap[t.catLabel] = (catMap[t.catLabel]||0) + t.amount;
+  });
+  var catRows = Object.keys(catMap).sort(function(a,b){return catMap[b]-catMap[a]}).slice(0,8).map(function(c){
+    return '<tr><td>'+escH(c)+'</td><td style="text-align:right">'+fmt(catMap[c])+'</td></tr>';
+  }).join('');
+
+  // transactions
+  var txRows = txs.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date)}).map(function(t){
+    var d = new Date(t.date);
+    var color = t.type==='income' ? '#1a8a52' : '#c0392b';
+    var sign = t.type==='income' ? '+' : '-';
+    var w = wallets.filter(function(x){return x.id===t.walletId})[0];
+    return '<tr>'+
+      '<td>'+d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'})+'</td>'+
+      '<td>'+escH(t.catEmoji||'')+'</td>'+
+      '<td>'+escH(t.name)+'</td>'+
+      '<td>'+escH(t.catLabel||'')+'</td>'+
+      '<td>'+escH(w?w.name:'—')+'</td>'+
+      '<td style="text-align:right;font-weight:600;color:'+color+'">'+sign+fmt(t.amount)+'</td>'+
+    '</tr>';
+  }).join('');
+
+  // goals
+  var goalRows = goals.map(function(g){
+    var pct = g.target>0?Math.min(100,Math.round(g.current/g.target*100)):0;
+    return '<tr><td>'+escH(g.emoji||'🎯')+' '+escH(g.name)+'</td><td style="text-align:right">'+fmt(g.current)+'</td><td style="text-align:right">'+fmt(g.target)+'</td><td style="text-align:right">'+pct+'%</td></tr>';
+  }).join('');
+
+  // debt summary
+  var owes = debts.filter(function(d){return d.type==='owe'&&d.paid<d.amount});
+  var lends = debts.filter(function(d){return d.type==='lend'&&d.paid<d.amount});
+  var totalOwe = owes.reduce(function(s,d){return s+(d.amount-d.paid)},0);
+  var totalLend = lends.reduce(function(s,d){return s+(d.amount-d.paid)},0);
+
+  var html = '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"/>'+
+  '<title>PengLon — Laporan '+periodeLabel+'</title>'+
+  '<style>'+
+    '*{box-sizing:border-box;margin:0;padding:0}'+
+    'body{font-family:"Segoe UI",Arial,sans-serif;font-size:11px;color:#1a1a1a;background:#fff;padding:28px 32px}'+
+    'h1{font-size:22px;font-weight:700;color:#8a6a1a;margin-bottom:2px}'+
+    '.subtitle{font-size:11px;color:#888;margin-bottom:4px}'+
+    '.header-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid #c9a84c}'+
+    '.logo{display:flex;align-items:center;gap:8px}'+
+    '.logo-ico{width:34px;height:34px;background:linear-gradient(135deg,#C9A84C,#A8893A);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#0A0A0B}'+
+    '.logo-name{font-size:18px;font-weight:700;color:#8a6a1a;font-family:Georgia,serif}'+
+    '.logo-badge{font-size:8px;background:#fdf3d7;border:1px solid #c9a84c;color:#8a6a1a;padding:1px 5px;border-radius:99px;font-weight:700}'+
+    '.meta{text-align:right;font-size:10px;color:#888;line-height:1.6}'+
+    '.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}'+
+    '.sum-box{border:1px solid #eee;border-radius:8px;padding:10px 12px;background:#fafafa}'+
+    '.sum-box.green{border-color:#a8e6c4;background:#f0fdf7}'+
+    '.sum-box.red{border-color:#f5c0b5;background:#fff8f7}'+
+    '.sum-box.gold{border-color:#e8d5a0;background:#fffbf0}'+
+    '.sum-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:3px}'+
+    '.sum-val{font-size:15px;font-weight:700;color:#1a1a1a}'+
+    '.sum-val.green{color:#1a8a52}.sum-val.red{color:#c0392b}.sum-val.gold{color:#8a6a1a}'+
+    'h2{font-size:12px;font-weight:700;color:#333;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #eee;text-transform:uppercase;letter-spacing:.5px}'+
+    'table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:6px}'+
+    'th{background:#f5f0e8;padding:5px 7px;text-align:left;font-weight:700;color:#555;font-size:9px;text-transform:uppercase;letter-spacing:.5px}'+
+    'td{padding:5px 7px;border-bottom:1px solid #f0f0f0;vertical-align:top}'+
+    'tr:last-child td{border-bottom:none}'+
+    'tr:nth-child(even) td{background:#fafafa}'+
+    '.footer{margin-top:22px;padding-top:10px;border-top:1px solid #eee;font-size:9px;color:#aaa;text-align:center}'+
+    '.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}'+
+    '.debt-row{display:flex;justify-content:space-between;padding:7px 10px;background:#f9f9f9;border-radius:6px;margin-bottom:5px;font-size:10px}'+
+    '@media print{body{padding:16px 20px}}'+
+  '</style></head><body>'+
+
+  '<div class="header-row">'+
+    '<div class="logo">'+
+      '<div class="logo-ico">P</div>'+
+      '<div>'+
+        '<div class="logo-name">PengLon</div>'+
+        '<div class="logo-badge">Keuangan Pribadi</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="meta">'+
+      '<div style="font-weight:700;font-size:12px;color:#333">Laporan Keuangan</div>'+
+      '<div>Periode: <b>'+escH(periodeLabel)+'</b></div>'+
+      '<div>Dicetak: '+tanggalCetak+'</div>'+
+      '<div style="color:#c9a84c;font-weight:600">© 2025 Hafidh</div>'+
+    '</div>'+
+  '</div>'+
+
+  '<div class="summary-grid">'+
+    '<div class="sum-box green"><div class="sum-lbl">Total Pemasukan</div><div class="sum-val green">'+fmt(totalIn)+'</div></div>'+
+    '<div class="sum-box red"><div class="sum-lbl">Total Pengeluaran</div><div class="sum-val red">'+fmt(totalOut)+'</div></div>'+
+    '<div class="sum-box gold"><div class="sum-lbl">Saldo Bersih</div><div class="sum-val '+(balance>=0?'green':'red')+'">'+fmt(balance)+'</div></div>'+
+  '</div>'+
+
+  '<div class="two-col">'+
+  '<div>'+
+  '<h2>💼 Saldo Dompet</h2>'+
+  (wallets.length?'<table><thead><tr><th>Dompet</th><th>Tipe</th><th style="text-align:right">Saldo</th></tr></thead><tbody>'+walletRows+'</tbody></table>':'<p style="color:#aaa;font-size:10px">Belum ada dompet.</p>')+
+  '</div>'+
+  '<div>'+
+  '<h2>📊 Top Kategori Pengeluaran</h2>'+
+  (catRows?'<table><thead><tr><th>Kategori</th><th style="text-align:right">Total</th></tr></thead><tbody>'+catRows+'</tbody></table>':'<p style="color:#aaa;font-size:10px">Belum ada pengeluaran.</p>')+
+  '</div>'+
+  '</div>'+
+
+  (goals.length?'<h2>🎯 Tabungan & Goals</h2><table><thead><tr><th>Goal</th><th style="text-align:right">Terkumpul</th><th style="text-align:right">Target</th><th style="text-align:right">Progress</th></tr></thead><tbody>'+goalRows+'</tbody></table>':'')+
+
+  ((totalOwe>0||totalLend>0)?
+    '<h2>🤝 Hutang & Piutang Aktif</h2>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'+
+      '<div class="sum-box red"><div class="sum-lbl">Total Hutang Sisa</div><div class="sum-val red">'+fmt(totalOwe)+'</div></div>'+
+      '<div class="sum-box green"><div class="sum-lbl">Total Piutang Sisa</div><div class="sum-val green">'+fmt(totalLend)+'</div></div>'+
+    '</div>':'')+
+
+  '<h2>💸 Daftar Transaksi ('+txs.length+')</h2>'+
+  (txRows?'<table><thead><tr><th>Tanggal</th><th></th><th>Nama</th><th>Kategori</th><th>Dompet</th><th style="text-align:right">Nominal</th></tr></thead><tbody>'+txRows+'</tbody></table>':'<p style="color:#aaa;font-size:10px">Tidak ada transaksi pada periode ini.</p>')+
+
+  '<div class="footer">Dibuat oleh PengLon — Aplikasi Keuangan Pribadi &nbsp;|&nbsp; © 2025 Hafidh. All rights reserved.</div>'+
+  '</body></html>';
+
+  // open in new window and trigger print
+  var win = window.open('','_blank','width=900,height=700');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(function(){ win.print(); }, 600);
+  showToast('🗂️ Laporan PDF siap dicetak');
 }
 
 /* ══ WALLET SYSTEM ══════════════════════════════════════ */
@@ -4495,7 +4646,7 @@ function backupJSON(){
   };
   var json=JSON.stringify(data,null,2);
   var d=new Date();
-  var filename='fintrack-backup-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'.json';
+  var filename='PengLon-backup-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'.json';
 
   // 1) iOS/Android — Share Sheet (paling reliable, muncul sebelum File System API)
   var fileObj=new File([json],filename,{type:'application/json'});
@@ -4525,7 +4676,7 @@ function shareBackup(){
   };
   var json=JSON.stringify(data,null,2);
   var d=new Date();
-  var filename='fintrack-backup-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'.json';
+  var filename='PengLon-backup-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'.json';
   var file=new File([json],filename,{type:'application/json'});
 
   // Web Share API with file
