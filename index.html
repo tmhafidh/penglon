@@ -169,12 +169,30 @@ input,select,textarea{font-family:inherit}
   padding:0 1.25rem;gap:.75rem;
 }
 .logo{
-  font-family:'DM Serif Display',Georgia,serif;
-  font-size:1.15rem;color:var(--gold);white-space:nowrap;letter-spacing:0px;
+  display:flex;align-items:center;gap:.55rem;white-space:nowrap;text-decoration:none;
 }
-.logo small{
+.logo-ico{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold-d) 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',Georgia,serif;
+  font-size:.88rem;font-weight:700;color:#0A0A0B;
+  box-shadow:0 2px 10px rgba(201,168,76,.28);
+}
+.logo-name{
+  font-family:'DM Serif Display',Georgia,serif;
+  font-size:1.1rem;color:var(--gold);letter-spacing:0px;
+}
+.logo-sub{
   color:var(--muted);font-family:'DM Sans',sans-serif;
-  font-weight:400;font-size:.56rem;margin-left:.3rem;letter-spacing:.7px;text-transform:uppercase;
+  font-weight:400;font-size:.54rem;letter-spacing:.7px;text-transform:uppercase;
+  display:block;margin-top:.08rem;
+}
+.logo-badge{
+  font-size:.52rem;font-weight:700;letter-spacing:.7px;text-transform:uppercase;
+  background:rgba(201,168,76,.1);border:1px solid var(--gold-border);
+  color:var(--gold);padding:.08rem .4rem;border-radius:999px;
+  align-self:center;flex-shrink:0;
 }
 .header-right{display:flex;align-items:center;gap:.4rem}
 .month-sel{
@@ -1399,7 +1417,14 @@ body.light-mode ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15)}
 
 <!-- ═══ HEADER ═══════════════════════════════════════════ -->
 <header class="header">
-  <div class="logo serif">PengLon<small>/ Keuangan Pribadi</small></div>
+  <div class="logo">
+    <div class="logo-ico">P</div>
+    <div>
+      <span class="logo-name">PengLon</span>
+      <small class="logo-sub">Keuangan Pribadi</small>
+    </div>
+    <span class="logo-badge">Beta</span>
+  </div>
   <div class="header-right">
     <div class="period-pill" id="periodPill" onclick="openPeriodModal()">
       <span class="period-icon">📅</span>
@@ -1417,8 +1442,12 @@ body.light-mode ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15)}
   <div class="sidebar-nav desktop-sidebar" id="sidebarNav">
     <!-- Logo area -->
     <div style="padding:.25rem .65rem 1rem;border-bottom:1px solid var(--border);margin-bottom:.75rem">
-      <div class="serif" style="font-size:1.1rem;color:var(--gold);letter-spacing:-.3px">PengLon</div>
-      <div style="font-size:.65rem;color:var(--muted)">Keuangan Pribadi</div>
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.1rem">
+        <div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--gold),var(--gold-d));display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',Georgia,serif;font-size:.78rem;font-weight:700;color:#0A0A0B;flex-shrink:0">P</div>
+        <span class="serif" style="font-size:1rem;color:var(--gold);letter-spacing:-.2px">PengLon</span>
+        <span style="font-size:.48rem;font-weight:700;letter-spacing:.7px;text-transform:uppercase;background:rgba(201,168,76,.1);border:1px solid var(--gold-border);color:var(--gold);padding:.06rem .35rem;border-radius:999px">Beta</span>
+      </div>
+      <div style="font-size:.6rem;color:var(--muted);letter-spacing:.4px">Keuangan Pribadi</div>
     </div>
 
     <div class="sidebar-section-label">Menu Utama</div>
@@ -5786,6 +5815,19 @@ function loadDummyData(){
 </div>
 
 <button class="fab-float" onclick="openAddModal()" aria-label="Tambah transaksi">＋</button>
+
+<!-- COPYRIGHT -->
+<div style="
+  text-align:center;
+  padding:.65rem 1rem calc(.65rem + env(safe-area-inset-bottom));
+  font-size:.6rem;color:var(--muted2);
+  border-top:1px solid var(--border);
+  background:var(--dark);
+  position:relative;z-index:1;
+  letter-spacing:.3px;
+">
+  © 2025 Hafidh. All rights reserved.
+</div>
 
 </body>
 </html>
